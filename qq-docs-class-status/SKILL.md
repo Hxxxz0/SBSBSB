@@ -30,7 +30,7 @@ If `NODE_PATH` is already configured with Playwright, omit it. If Chrome is not 
   - `在校住宿` as 在校
   - `在家` as 在家
   - `校外住宿` as 校外居住
-  - blank latest statuses as 联系不上, unless the whole date column is blank
+  - blank latest statuses as `xx联系不上`; if nobody is missing, omit this phrase entirely
 - Write the final update in this style:
 
 ```text

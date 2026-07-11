@@ -106,7 +106,7 @@ function buildSummary(result) {
     `${result.counts.offCampus}人校外居住`,
   ];
   if (result.missingNames.length > 0) {
-    parts.push(`${result.missingNames.join("、")}没联系上`);
+    parts.push(`${result.missingNames.join("、")}联系不上`);
   }
   let sentence = `${parts.join("，")}`;
   if (result.changes.length > 0) {
