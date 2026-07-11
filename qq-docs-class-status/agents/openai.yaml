@@ -1,0 +1,4 @@
+interface:
+  display_name: "QQ Docs Class Status"
+  short_description: "Summarize Tencent Docs class status."
+  default_prompt: "Use $qq-docs-class-status to generate a concise class status update from a Tencent Docs sheet."
