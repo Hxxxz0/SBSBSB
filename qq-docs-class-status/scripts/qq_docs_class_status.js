@@ -123,6 +123,8 @@ function buildSummary(result) {
   let sentence = `${parts.join("，")}`;
   if (result.changes.length > 0) {
     sentence += `，相较于昨天，${result.changes.join("，")}`;
+  } else if (result.previousDate) {
+    sentence += "，相较于昨天无变化";
   }
   return `${sentence}。`;
 }

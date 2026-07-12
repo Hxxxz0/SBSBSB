@@ -26,7 +26,7 @@ If `NODE_PATH` is already configured with Playwright, omit it. If Chrome is not 
 - Detect date columns from the sheet date row and pair each date column with its `目前去向` values.
 - First get the current date using `--timezone` (default `Asia/Shanghai`) and use that date column unless `--date` is provided.
 - Use the latest date column with at least one filled status only when `--latest-filled` is explicitly provided.
-- Compare against the nearest previous date column that has filled statuses. For 今日变化, only write `xx离校` when someone changed from `在校住宿` to a non-campus filled status, and only write `xx返校` when someone changed from a non-campus filled status to `在校住宿`. If there are no such changes, omit the whole `相较于昨天...` phrase.
+- Compare against the nearest previous date column that has filled statuses. For 今日变化, only write `xx离校` when someone changed from `在校住宿` to a non-campus filled status, and only write `xx返校` when someone changed from a non-campus filled status to `在校住宿`. If there are no such changes, still append `相较于昨天无变化`.
 - Count:
   - `在校住宿` as 在校
   - `在家` as 在家
@@ -36,6 +36,12 @@ If `NODE_PATH` is already configured with Playwright, omit it. If Chrome is not 
 
 ```text
 崇新在校情况更新：8人在校，19人在家，0人校外居住，相较于昨天，王嵩泽离校。
+```
+
+When nobody returned or left:
+
+```text
+崇新在校情况更新：7人在校，18人在家，0人校外居住，胡君安、张子诺联系不上，相较于昨天无变化。
 ```
 
 ## Useful Options
