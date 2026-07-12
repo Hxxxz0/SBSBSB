@@ -8,7 +8,7 @@ function parseArgs(argv) {
     const item = argv[i];
     if (!item.startsWith("--")) continue;
     const key = item.slice(2);
-    if (key === "json" || key === "debug") {
+    if (key === "json" || key === "debug" || key === "latest-filled") {
       args[key] = true;
     } else {
       args[key] = argv[i + 1];
@@ -25,6 +25,8 @@ function usage() {
     "",
     "Options:",
     "  --date <YYYY-MM-DD|M月D日|MM-DD>  Force report date",
+    "  --timezone <tz>                  Timezone for today's date, default Asia/Shanghai",
+    "  --latest-filled                  Use latest filled date instead of today's date",
     "  --chrome <path>                  Chrome executable path",
     "  --rows <n>                       Rows to read, default 450",
     "  --cols <n>                       Columns to read, default 130",
@@ -70,6 +72,17 @@ function normalizeDateValue(raw) {
   }
 
   return null;
+}
+
+function todayInTimezone(timeZone) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const get = (type) => parts.find((part) => part.type === type).value;
+  return `${get("year")}-${get("month")}-${get("day")}`;
 }
 
 function dateMatches(target, candidate) {
@@ -179,7 +192,7 @@ async function readSheetValues({ url, chrome, rows, cols, waitMs }) {
   }
 }
 
-function analyze(values, classQuery, forcedDate) {
+function analyze(values, classQuery, options = {}) {
   const headerRow = values.findIndex(
     (row) => row.includes("序号") && row.includes("姓名") && row.includes("班级")
   );
@@ -215,15 +228,16 @@ function analyze(values, classQuery, forcedDate) {
   if (classRows.length === 0) throw new Error(`No rows matched class "${classQuery}".`);
 
   const filledCount = (col) => classRows.filter((entry) => entry.row[col]).length;
-  let currentDate = forcedDate
-    ? dateColumns.find((date) => dateMatches(forcedDate, date))
-    : [...dateColumns].reverse().find((date) => filledCount(date.col) > 0);
+  const targetDate = options.forcedDate || options.today;
+  let currentDate = options.latestFilled
+    ? [...dateColumns].reverse().find((date) => filledCount(date.col) > 0)
+    : dateColumns.find((date) => dateMatches(targetDate, date));
   if (!currentDate) {
-    throw new Error(forcedDate ? `Could not find date "${forcedDate}".` : "No filled date column found.");
-  }
-
-  if (!forcedDate && filledCount(currentDate.col) === 0) {
-    currentDate = [...dateColumns].reverse().find((date) => filledCount(date.col) > 0);
+    throw new Error(
+      options.latestFilled
+        ? "No filled date column found."
+        : `Could not find current date column "${targetDate}". Use --date to force a date or --latest-filled to report the latest filled column.`
+    );
   }
 
   const previousDate = [...dateColumns]
@@ -253,6 +267,7 @@ function analyze(values, classQuery, forcedDate) {
   const result = {
     classLabel,
     matchedClassNames: [...new Set(classRows.map((row) => row.className))],
+    today: options.today,
     reportDate: currentDate,
     previousDate,
     totalRows: classRows.length,
@@ -280,7 +295,13 @@ async function main() {
     cols: Number(args.cols || 130),
     waitMs: Number(args["wait-ms"] || 14000),
   });
-  const result = analyze(values, args.class, args.date);
+  const timeZone = args.timezone || "Asia/Shanghai";
+  const today = todayInTimezone(timeZone);
+  const result = analyze(values, args.class, {
+    forcedDate: args.date,
+    latestFilled: Boolean(args["latest-filled"]),
+    today,
+  });
   if (args.json) {
     console.log(JSON.stringify(result, null, 2));
   } else {

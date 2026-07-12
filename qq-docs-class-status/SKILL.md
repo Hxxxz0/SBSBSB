@@ -1,6 +1,6 @@
 ---
 name: qq-docs-class-status
-description: Generate Chinese class stay-away status updates from Tencent Docs online spreadsheets. Use when Codex needs to open or scrape a docs.qq.com sheet, identify a class such as 崇新/崇新23, count daily statuses like 在校住宿、在家、校外住宿, compare with the previous filled day, and produce a concise update sentence.
+description: Generate Chinese class stay-away status updates from Tencent Docs online spreadsheets. Use when Codex needs to open or scrape a docs.qq.com sheet, first determine the current date, identify a class such as 崇新/崇新23, count daily statuses like 在校住宿、在家、校外住宿, compare with the previous filled day, and produce a concise update sentence.
 ---
 
 # QQ Docs Class Status
@@ -24,7 +24,8 @@ If `NODE_PATH` is already configured with Playwright, omit it. If Chrome is not 
 
 - Match `--class` as an exact class name or prefix, so `崇新` matches `崇新23`.
 - Detect date columns from the sheet date row and pair each date column with its `目前去向` values.
-- Use the latest date column with at least one filled status unless `--date` is provided.
+- First get the current date using `--timezone` (default `Asia/Shanghai`) and use that date column unless `--date` is provided.
+- Use the latest date column with at least one filled status only when `--latest-filled` is explicitly provided.
 - Compare against the nearest previous date column that has filled statuses.
 - Count:
   - `在校住宿` as 在校
@@ -40,6 +41,8 @@ If `NODE_PATH` is already configured with Playwright, omit it. If Chrome is not 
 ## Useful Options
 
 - `--date 7月11日` or `--date 2026-07-11`: force a specific report date.
+- `--timezone Asia/Shanghai`: timezone used to determine today's date.
+- `--latest-filled`: ignore today's date and report the latest filled date column.
 - `--json`: print the detailed parsed result as JSON.
 - `--rows 450 --cols 130`: increase the read range if the sheet grows.
 - `--wait-ms 14000`: wait longer for Tencent Docs to finish loading.
