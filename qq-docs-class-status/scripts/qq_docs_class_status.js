@@ -106,10 +106,9 @@ function statusCategory(status) {
 
 function describeChange(row, previous, current) {
   if (!previous || !current || previous === current) return null;
-  if (previous === "在校住宿" && current === "在家") return `${row.name}离校`;
   if (previous === "在校住宿" && current !== "在校住宿") return `${row.name}离校`;
   if (previous !== "在校住宿" && current === "在校住宿") return `${row.name}返校`;
-  return `${row.name}由${previous}改为${current}`;
+  return null;
 }
 
 function buildSummary(result) {
